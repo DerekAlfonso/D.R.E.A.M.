@@ -213,6 +213,8 @@ public class Game implements Runnable {
             + "   (0.0 - 1.0)", 10, 15, Color.WHITE);
         Terminal.print("[-] textSpeed     = " + format(Settings.textSpeed)
             + "   (0.1 - 5.0, higher is faster)", 10, 15, Color.WHITE);
+        Terminal.print("[-] textScale     = " + format(Settings.textScale)
+            + "   (0.5 - 3.0, text size)", 10, 15, Color.WHITE);
         Terminal.print("[-] typingSounds  = " + Settings.typingSounds
             + "   (true / false)", 10, 15, Color.WHITE);
     }
@@ -241,6 +243,10 @@ public class Game implements Runnable {
                     break;
                 case "textspeed":
                     Settings.textSpeed = Double.parseDouble(value);
+                    Settings.apply();
+                    break;
+                case "textscale":
+                    Settings.textScale = Settings.clampScale(Double.parseDouble(value));
                     Settings.apply();
                     break;
                 case "typingsounds":

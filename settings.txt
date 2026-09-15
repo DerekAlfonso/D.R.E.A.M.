@@ -1,6 +1,7 @@
 #D.R.E.A.M settings
-#Mon Sep 14 20:35:04 CDT 2026
+#Mon Sep 14 20:40:09 CDT 2026
 textSpeed=1.0
 typingSounds=true
+textScale=1.0
 musicVolume=0.5
 sfxVolume=0.7

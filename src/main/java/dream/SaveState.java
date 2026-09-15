@@ -37,7 +37,9 @@ public final class SaveState {
         username = emptyToNull(props.getProperty("username"));
         cpuName = emptyToNull(props.getProperty("cpuName"));
         favoriteColor = emptyToNull(props.getProperty("favoriteColor"));
-        Log.info("Loaded save state for " + username);
+        if (username != null) {
+            Log.info("Loaded save state for " + username);
+        }
     }
 
     public static void save() {

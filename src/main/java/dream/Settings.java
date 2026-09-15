@@ -22,6 +22,12 @@ public final class Settings {
     public static double textSpeed = 1.0;
     public static boolean typingSounds = true;
 
+    /**
+     * Extra text magnification on top of the automatic scaling the terminal
+     * derives from the screen height. 1.0 leaves the automatic size alone.
+     */
+    public static double textScale = 1.0;
+
     private Settings() { }
 
     public static void load() {
@@ -37,6 +43,7 @@ public final class Settings {
         sfxVolume = readFloat(props, "sfxVolume", sfxVolume);
         musicVolume = readFloat(props, "musicVolume", musicVolume);
         textSpeed = readDouble(props, "textSpeed", textSpeed);
+        textScale = clampScale(readDouble(props, "textScale", textScale));
         typingSounds = Boolean.parseBoolean(
             props.getProperty("typingSounds", String.valueOf(typingSounds)));
 
@@ -48,6 +55,7 @@ public final class Settings {
         props.setProperty("sfxVolume", String.valueOf(sfxVolume));
         props.setProperty("musicVolume", String.valueOf(musicVolume));
         props.setProperty("textSpeed", String.valueOf(textSpeed));
+        props.setProperty("textScale", String.valueOf(textScale));
         props.setProperty("typingSounds", String.valueOf(typingSounds));
 
         try (OutputStream out = Files.newOutputStream(FILE)) {
@@ -63,6 +71,12 @@ public final class Settings {
         AudioManager.setMusicVolume(musicVolume);
         Terminal.setSpeedMultiplier(textSpeed);
         Terminal.setTypingSounds(typingSounds);
+        // Text size may have changed, so recentre and rescale what is on screen.
+        Terminal.relayout();
+    }
+
+    public static double clampScale(double value) {
+        return Math.max(0.5, Math.min(3.0, value));
     }
 
     private static float readFloat(Properties props, String key, float fallback) {

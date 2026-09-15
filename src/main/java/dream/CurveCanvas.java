@@ -50,6 +50,9 @@ public class CurveCanvas extends JPanel {
             @Override
             public void componentResized(ComponentEvent e) {
                 rebuildScanlines();
+                // Keep the text column centred and correctly sized for the
+                // new dimensions.
+                Terminal.relayout();
             }
         });
     }

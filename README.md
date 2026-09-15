@@ -45,9 +45,17 @@ At the boot menu, type `ProjectDream.iso`, `settings.bin` or `credits.txt`.
 | `sfxVolume` | 0.0 - 1.0 | Keyboard and scroll click volume |
 | `musicVolume` | 0.0 - 1.0 | Startup whirr volume |
 | `textSpeed` | 0.1 - 5.0 | Typing speed, higher is faster |
+| `textScale` | 0.5 - 3.0 | Text size, on top of automatic screen scaling |
 | `typingSounds` | true / false | Click as dialogue types itself out |
 
-Change a value with `set <name> <value>`, for example `set textSpeed 2.0`.
+Change a value with `set <name> <value>`, for example `set textSpeed 2.0` or
+`set textScale 1.4`. Changes apply immediately, including to text already on
+screen.
+
+Text already scales itself to the screen height, so `textScale` is a nudge on
+top of that rather than the whole story. The terminal keeps dialogue in a
+centred column about 85 characters wide so lines stay readable on an ultrawide
+display.
 
 Your name and the name you give the AI are saved to `saveState.txt`.
 

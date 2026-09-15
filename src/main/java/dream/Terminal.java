@@ -46,8 +46,12 @@ public final class Terminal {
     /** Closest the oldest line may be scrolled to the top of the screen. */
     private static final int BASE_TOP_MARGIN = 60;
 
-    /** Widest the readable text column is allowed to get, in reference pixels. */
-    private static final int BASE_MAX_COLUMN = 1000;
+    /**
+     * Widest the readable text column is allowed to get, in reference pixels.
+     * Roughly 85 characters, which keeps the column near the middle of a wide
+     * screen instead of starting hard against the left edge.
+     */
+    private static final int BASE_MAX_COLUMN = 700;
 
     /** Shortest gap between two typing clicks, so fast text is not a buzz. */
     private static final int CLICK_INTERVAL_MS = 80;
@@ -253,7 +257,7 @@ public final class Terminal {
             line.setY(line.y - req.pushUpAmount);
         }
 
-        TextData newLine = new TextData("", START_X, homeY(), req.fontSize,
+        TextData newLine = new TextData("", startX(), homeY(), req.fontSize,
             req.color, req.font);
         activeLines.add(newLine);
         canvas.addTextToLayer(CurveCanvas.TEXT_LAYER, newLine);
@@ -297,7 +301,7 @@ public final class Terminal {
 
     private static int homeY() {
         int height = canvas.getHeight() > 0 ? canvas.getHeight() : 800;
-        return (height - HOME_MARGIN) + scrollOffset;
+        return (height - scaled(BASE_HOME_MARGIN)) + scrollOffset;
     }
 
     private static void trimHistory() {
@@ -373,11 +377,11 @@ public final class Terminal {
         inputResult = result;
 
         for (TextData line : activeLines) {
-            line.setY(line.y - LINE_HEIGHT);
+            line.setY(line.y - scaled(BASE_LINE_HEIGHT));
         }
 
-        Font font = baseFont.deriveFont(Font.PLAIN, 15f);
-        inputLine = new TextData(promptSymbol, START_X, homeY(), 15, Color.GREEN, font);
+        Font font = baseFont.deriveFont(Font.PLAIN, (float) scaledFontSize(15));
+        inputLine = new TextData(promptSymbol, startX(), homeY(), 15, Color.GREEN, font);
         activeLines.add(inputLine);
         canvas.addTextToLayer(CurveCanvas.TEXT_LAYER, inputLine);
         canvas.repaint();
@@ -454,12 +458,12 @@ public final class Terminal {
         }
 
         int height = canvas.getHeight() > 0 ? canvas.getHeight() : 800;
-        int restingY = height - HOME_MARGIN;
+        int restingY = height - scaled(BASE_HOME_MARGIN);
 
         // Never scroll the newest line above where it normally sits.
         int minDelta = restingY - maxY;
         // Never drag the oldest line below the top margin.
-        int maxDelta = TOP_MARGIN - minY;
+        int maxDelta = scaled(BASE_TOP_MARGIN) - minY;
 
         if (maxDelta < minDelta) {
             // Log is shorter than one screen: pin it in place.

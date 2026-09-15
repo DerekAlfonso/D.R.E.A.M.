@@ -26,7 +26,7 @@ public class Game implements Runnable {
             boot();
             while (running) {
                 showMenu();
-                handleChoice(Terminal.prompt().trim());
+                handleChoice(ask());
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -38,6 +38,41 @@ public class Game implements Runnable {
 
     public void stop() {
         running = false;
+    }
+
+    // ----------------------------------------------------------------- input
+
+    /**
+     * Every prompt in the game goes through here, so "quit" and "exit" close
+     * the program from anywhere: the boot menu, a name prompt, the credits or
+     * the settings screen.
+     */
+    private String ask() throws InterruptedException {
+        String input = Terminal.prompt().trim();
+
+        if (input.equalsIgnoreCase("quit") || input.equalsIgnoreCase("exit")) {
+            quit();
+        }
+        return input;
+    }
+
+    /** Says goodbye, then tears the program down. Does not return. */
+    private void quit() throws InterruptedException {
+        running = false;
+        Terminal.print("Goodbye.", 40, 15, Color.GREEN);
+        Terminal.awaitIdle();
+        pause(800);
+        Main.shutdown();
+    }
+
+    /**
+     * Words that back out of a sub-screen to the boot menu. "exit" is
+     * deliberately not one of them: it quits the program instead.
+     */
+    private static boolean isBackCommand(String input) {
+        return input.equalsIgnoreCase("back")
+            || input.equalsIgnoreCase("return")
+            || input.equalsIgnoreCase("home");
     }
 
     // ------------------------------------------------------------------ boot
@@ -73,6 +108,9 @@ public class Game implements Runnable {
             bar.set(renderBar(percent));
             pause(random.nextInt(101));
         }
+
+        // The machine spins up the moment the load finishes, not at launch.
+        AudioManager.playMusic(AudioManager.STARTUP_WHIRR, false);
 
         Terminal.print("Loading complete, enjoy!", 20, 15, Color.GREEN);
     }
@@ -110,11 +148,6 @@ public class Game implements Runnable {
             runSettings();
         } else if (normalized.equals("credits.txt")) {
             runCredits();
-        } else if (normalized.equals("exit") || normalized.equals("quit")) {
-            Terminal.print("Goodbye.", 40, 15, Color.GREEN);
-            Terminal.awaitIdle();
-            pause(800);
-            Main.shutdown();
         } else {
             Terminal.print("please select a valid file name", 20, 15, Color.RED);
         }
@@ -172,9 +205,9 @@ public class Game implements Runnable {
      * Keeps asking until the answer is usable. The original compared strings
      * with {@code ==}, so every answer including an empty one was accepted.
      */
-    private String askForName(int minimumLength) {
+    private String askForName(int minimumLength) throws InterruptedException {
         while (true) {
-            String input = Terminal.prompt().trim();
+            String input = ask();
 
             if (input.isEmpty()
                 || input.length() < minimumLength
@@ -207,9 +240,7 @@ public class Game implements Runnable {
         // Wait for BACK rather than a fixed 40 second sleep, and actually leave
         // when it is typed. The original did the opposite of both.
         while (running) {
-            String input = Terminal.prompt().trim().toLowerCase();
-            if (input.equals("exit") || input.equals("back")
-                || input.equals("return") || input.equals("home")) {
+            if (isBackCommand(ask())) {
                 Terminal.blankLine();
                 return;
             }
@@ -228,11 +259,10 @@ public class Game implements Runnable {
             Terminal.print("change a value with: set <name> <value>", 15, 15, Color.WHITE);
             Terminal.print("type BACK to go to the main menu.", 15, 15, Color.RED);
 
-            String input = Terminal.prompt().trim();
+            String input = ask();
             String normalized = input.toLowerCase();
 
-            if (normalized.equals("back") || normalized.equals("exit")
-                || normalized.equals("return") || normalized.equals("home")) {
+            if (isBackCommand(input)) {
                 Settings.save();
                 Terminal.print("settings saved.", 20, 15, Color.GREEN);
                 Terminal.blankLine();

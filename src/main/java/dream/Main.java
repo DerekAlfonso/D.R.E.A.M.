@@ -54,9 +54,8 @@ public final class Main {
             return;
         }
 
-        // The boot whirr streams on its own thread, so the story starts on time.
-        AudioManager.playMusic(AudioManager.STARTUP_WHIRR, false);
-
+        // The boot whirr is fired by the story once the loading bar finishes,
+        // so the machine sounds like it is spinning up as it comes to life.
         game = new Game();
         Thread storyThread = new Thread(game, "dream-story");
         storyThread.setDaemon(true);

@@ -9,6 +9,8 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -38,6 +40,16 @@ public class CurveCanvas extends JPanel {
     public CurveCanvas() {
         setBackground(new Color(30, 30, 30));
         setFocusable(true);
+
+        // A JPanel does not take keyboard focus just because it was clicked, so
+        // without this a single click anywhere in the window leaves the game
+        // unable to hear the keyboard.
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                requestFocusInWindow();
+            }
+        });
 
         // Text underneath, scanlines on top.
         createLayer(TEXT_LAYER, 0);

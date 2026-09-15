@@ -25,12 +25,20 @@ public final class Main {
     private static JFrame frame;
     private static Game game;
 
+    /** Set by --doom: jump straight to the easter egg instead of the menu. */
+    static boolean startInDoom = false;
+
     private Main() { }
 
     public static void main(String[] args) {
         for (String arg : args) {
             if ("--debug".equalsIgnoreCase(arg)) {
                 Log.debugMode = true;
+            } else if ("--doom".equalsIgnoreCase(arg)) {
+                // Skips the boot menu and drops straight into doom.exe. Saves
+                // sitting through the loading bar every time you want to poke
+                // at the renderer.
+                startInDoom = true;
             }
         }
 

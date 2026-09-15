@@ -201,6 +201,12 @@ public class Game implements Runnable {
         Terminal.print("thats nice.", 500, 15, Color.WHITE);
         pause(2000);
         Terminal.print("Okay now on to the fun part!", 20, 15, Color.WHITE);
+        pause(2000);
+        Terminal.print("I want to get to know you better", 20, 15, Color.WHITE);
+        pause(2000);
+        Terminal.print("but I can't just ask you questions all day (even if I want to)", 20, 15, Color.WHITE);
+        pause(2000);
+        Terminal.print("so lets play a few games together :)", 20, 15, Color.WHITE);   
         Terminal.awaitIdle();
 
         SaveState.save();

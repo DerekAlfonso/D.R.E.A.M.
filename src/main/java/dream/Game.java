@@ -23,7 +23,11 @@ public class Game implements Runnable {
     @Override
     public void run() {
         try {
-            boot();
+            if (Main.startInDoom) {
+                Doom.play(this::ask);
+            } else {
+                boot();
+            }
             while (running) {
                 showMenu();
                 handleChoice(ask());
@@ -148,6 +152,9 @@ public class Game implements Runnable {
             runSettings();
         } else if (normalized.equals("credits.txt")) {
             runCredits();
+        } else if (normalized.equals("doom.exe")) {
+            // Deliberately absent from the menu listing. If you know, you know.
+            Doom.play(this::ask);
         } else {
             Terminal.print("please select a valid file name", 20, 15, Color.RED);
         }

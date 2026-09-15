@@ -233,6 +233,51 @@ public final class Terminal {
     }
 
     /**
+     * Draws a block of rows at once: no typing animation, no word wrap, and
+     * line spacing tight enough that the rows read as one contiguous picture
+     * rather than separate messages.
+     *
+     * <p>This is what doom.exe renders its ASCII viewport into. Ordinary
+     * {@link #print} is useless for that, because it types characters out and
+     * leaves a full message gap between every row.
+     *
+     * <p>Blocks until queued dialogue has finished, so a frame never lands in
+     * the middle of a sentence.
+     */
+    public static void printFrame(String[] rows, int fontSize, Color color) {
+        if (canvas == null || rows.length == 0) {
+            return;
+        }
+        final String[] frame = rows.clone();
+        awaitIdle();
+
+        SwingUtilities.invokeLater(() -> {
+            // Just over one glyph height, so rows touch without overlapping.
+            int rowGap = Math.max(1, (int) Math.round(fontSize * 1.15 * uiScale()));
+
+            // Clear enough room for the whole block plus a normal message gap.
+            int push = (frame.length - 1) * rowGap + scaled(BASE_LINE_HEIGHT);
+            for (TextData line : activeLines) {
+                line.setY(line.y - push);
+            }
+
+            Font font = baseFont.deriveFont(Font.PLAIN, (float) scaledFontSize(fontSize));
+            int x = startX();
+            int bottom = homeY();
+
+            for (int i = 0; i < frame.length; i++) {
+                int y = bottom - (frame.length - 1 - i) * rowGap;
+                TextData data = new TextData(frame[i], x, y, fontSize, color, font);
+                activeLines.add(data);
+                canvas.addTextToLayer(CurveCanvas.TEXT_LAYER, data);
+            }
+
+            trimHistory();
+            canvas.repaint();
+        });
+    }
+
+    /**
      * A handle to one rewritable line. Safe to call from the story thread: the
      * update is marshalled onto the event thread, and because that queue is
      * ordered it always runs after the line itself has been created.

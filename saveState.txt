@@ -1,0 +1,5 @@
+#D.R.E.A.M save state
+#Mon Sep 14 20:35:04 CDT 2026
+favoriteColor=
+cpuName=
+username=

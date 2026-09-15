@@ -206,6 +206,55 @@ public final class Terminal {
         print(" ", 1, 15, Color.WHITE);
     }
 
+    /**
+     * Adds a line that rewrites itself in place instead of typing out, for
+     * things like a progress bar that has to update on one row.
+     *
+     * <p>Blocks until queued dialogue has finished so the line does not appear
+     * in the middle of a sentence.
+     */
+    public static StatusLine openStatusLine(int fontSize, Color color) {
+        awaitIdle();
+
+        StatusLine handle = new StatusLine();
+        SwingUtilities.invokeLater(() -> {
+            for (TextData line : activeLines) {
+                line.setY(line.y - scaled(BASE_LINE_HEIGHT));
+            }
+
+            Font font = baseFont.deriveFont(Font.PLAIN, (float) scaledFontSize(fontSize));
+            TextData data = new TextData("", startX(), homeY(), fontSize, color, font);
+            activeLines.add(data);
+            canvas.addTextToLayer(CurveCanvas.TEXT_LAYER, data);
+            trimHistory();
+            handle.bind(data);
+        });
+        return handle;
+    }
+
+    /**
+     * A handle to one rewritable line. Safe to call from the story thread: the
+     * update is marshalled onto the event thread, and because that queue is
+     * ordered it always runs after the line itself has been created.
+     */
+    public static final class StatusLine {
+        private TextData data;
+
+        private void bind(TextData data) {
+            this.data = data;
+        }
+
+        /** Replaces the whole line. Keep the text a fixed width so it does not jitter. */
+        public void set(String text) {
+            SwingUtilities.invokeLater(() -> {
+                if (data != null) {
+                    data.setText(text);
+                    canvas.repaint();
+                }
+            });
+        }
+    }
+
     private static void enqueue(String fullText, int speed, int fontSize, Color color) {
         Font font = baseFont.deriveFont(Font.PLAIN, (float) scaledFontSize(fontSize));
         FontMetrics metrics = canvas.getFontMetrics(font);

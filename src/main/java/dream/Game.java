@@ -47,10 +47,51 @@ public class Game implements Runnable {
         String chosenSplash = splashes.get(random.nextInt(splashes.size()));
 
         Terminal.print("INITIALIZING SYSTEM...", 20, 15, Color.GREEN);
-        pause(2400);
+        pause(1200);
+        runLoadingBar();
+        pause(600);
         Terminal.print("- " + chosenSplash, 20, 15, Color.WHITE);
         Terminal.print("----------------------", 0, 15, Color.WHITE);
         pause(2000);
+    }
+
+    /** How many cells wide the bar's track is. */
+    private static final int BAR_WIDTH = 24;
+
+    private static final char BAR_FILLED = '#';
+    private static final char BAR_EMPTY = '-';
+
+    /**
+     * A fake load, because booting instantly does not feel like putting a disc
+     * in. Each percentage point waits a random 0-100ms, so the bar stutters and
+     * surges the way a real one does instead of ticking along evenly.
+     */
+    private void runLoadingBar() throws InterruptedException {
+        Terminal.StatusLine bar = Terminal.openStatusLine(15, Color.GREEN);
+
+        for (int percent = 0; percent <= 100; percent++) {
+            bar.set(renderBar(percent));
+            pause(random.nextInt(101));
+        }
+
+        Terminal.print("Loading complete, enjoy!", 20, 15, Color.GREEN);
+    }
+
+    /**
+     * Builds one frame of the bar. The percentage is padded to three columns so
+     * the bar never shifts sideways as the number grows.
+     */
+    private static String renderBar(int percent) {
+        // Integer division floors, so the track only reads as full at exactly
+        // 100%. Rounding would fill it a percentage point early.
+        int filled = percent * BAR_WIDTH / 100;
+
+        StringBuilder track = new StringBuilder(BAR_WIDTH);
+        for (int cell = 0; cell < BAR_WIDTH; cell++) {
+            track.append(cell < filled ? BAR_FILLED : BAR_EMPTY);
+        }
+
+        return String.format("Loading: %3d%%  [%s]", percent, track);
     }
 
     private void showMenu() {
